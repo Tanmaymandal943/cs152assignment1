@@ -4,6 +4,7 @@
 (require racket/list
          racket/string
          (prefix-in utils: "utils.rkt"))
+(require "list-comprehension.rkt")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                                                                 ;;
@@ -46,6 +47,28 @@
 ;; order of frequency.
 (define (cipher-monograms ciphertext)
   '())
+
+(define freq (lc (cons x 0) : x <- (string->list "abcdefghijklmnopqrstuvwxyz")))
+
+(define (addlet l lst)
+  (if (null? lst) '()
+      (if (equal? (caar lst) l)
+          (cons (cons l (+ 1 (cdar lst))) (cdr lst))
+          (cons (car lst) (addlet l (cdr lst))))))
+
+
+(define (cipher-mono cipherlst lst)
+  (if (null? cipherlst)
+      lst
+      (cipher-mono (cdr cipherlst)(addlet (car cipherlst) lst))))
+
+(define (compcons a b)
+  (> (cdr a) cdr b))
+
+(
+      
+      
+   
 
 ;; Takes the cipher-word-list and produces a list of 2-letter bigram (strings)
 ;; sorted in decreasing order of frequency. Each element must be a string!
