@@ -30,35 +30,35 @@
           < (= n 1) 1 >
           < (+ (fib (- n 1)) (fib (- n 2))) >))
    
-(fib 5)
+;;(fib 5)
 
 
-(lc (+ x y) : x <- '(1 2 3 4 5 6) @(even? x)  y <- '( 7 8 9))
+;;(lc (+ x y) : x <- '(1 2 3 4 5 6) @(even? x)  y <- '( 7 8 9))
 
 
-(append* (lc
-          (lc (+ x y) : @(even? x) y <- '(7 8 9))
-          : x <- '(1 2 3 4 5 6)))
+;;(append* (lc
+  ;        (lc (+ x y) : @(even? x) y <- '(7 8 9))
+      ;;    : x <- '(1 2 3 4 5 6)))
 
-(append* (lc
-  (lc (lc (+ x y) : y <- '(7 8 9)) : @(even? x))
-  : x <- '(1 2 3 4 5 6)))
+;;(append* (lc
+  ;;(lc (lc (+ x y) : y <- '(7 8 9)) : @(even? x))
+  ;;: x <- '(1 2 3 4 5 6)))
 
 
-(append* (lc
-  (if (even? x) (lc (+ x y) : y <- '(7 8 9)) '())
-  : x <- '(1 2 3 4 5 6)))  
+;;(append* (lc
+  ;;(if (even? x) (lc (+ x y) : y <- '(7 8 9)) '())
+  ;;: x <- '(1 2 3 4 5 6)))  
           
-(append* (lc
-  (if (even? x) (map (lambda (y) (+ x y)) '(7 8 9)) '())
-  : x <- '(1 2 3 4 5 6))) 
+;;(append* (lc
+  ;;(if (even? x) (map (lambda (y) (+ x y)) '(7 8 9)) '())
+  ;;: x <- '(1 2 3 4 5 6))) 
 
-(append* (map (lambda (x)
-                (if (even? x) (map (lambda (y) (+ x y)) '(7 8 9)) '()))
-              '(1 2 3 4 5 6)))
+;;(append* (map (lambda (x)
+  ;;              (if (even? x) (map (lambda (y) (+ x y)) '(7 8 9)) '()))
+    ;;          '(1 2 3 4 5 6)))
 
-(lc (node x y) : x <- '(t1 t2 t3)
-                 y <- '(s1 s2))
+;;(lc (node x y) : x <- '(t1 t2 t3)
+  ;;               y <- '(s1 s2))
 
 (define (cprod l)
   (cond [(null? l) '(())]
