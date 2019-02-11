@@ -1,0 +1,25 @@
+demo [ <option> ... ] <key-file> <cipher-file>
+  
+  * You must always supply the input files (key and ciphertext) to this executable.
+  * The <key-file> is ignored in --crack-cipher and --strat-etai modes, a blank key
+    is used instead.
+  * The <cipher-file> is ignored in --secret-word-enum.
+  
+ where <option> is one of
+/ -e, --strat-etai : List substitutions computed by strategy etai on <cipher-file> on a blank key
+| -d, --dict-closure : Extend partial key in <key-file> using ciphertext from <input-file> using dictionary closure
+| -s, --secret-word-enum : Perform secret word enumeration using partial key in <key-file>
+\ -c, --crack-cipher : Crack cipher using a blank key and ciphertext from <cipher-file>
+ 
+
+  --help, -h : Show this help
+  -- : Do not treat any remaining argument as a switch (at this level)
+ /|\ Brackets indicate mutually exclusive options.
+ Multiple single-letter switches can be combined after one `-'; for
+  example: `-h-' is the same as `-h --'
+ 
+ KEY FORMAT
+ ----------
+ The key should look like: "g r a _ _ _ _ p s _ _ _ _ _ z b c _ _ _ _ k l _ _ _ _"
+ It should 26 space separated characters, lowercase, monoalphabetic. If a badly formatted
+ key is provided, behaviour is unspecified.
