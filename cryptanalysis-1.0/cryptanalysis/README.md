@@ -19,7 +19,7 @@ function: `crack-cipher`.
 1. EDIT:
    - main.rkt
    - dict-closure.rkt
-   - statistics.rkt
+   - statistics.rkt  done
    - strategies.rkt
 2. DO NOT EDIT:
    - utils.rkt

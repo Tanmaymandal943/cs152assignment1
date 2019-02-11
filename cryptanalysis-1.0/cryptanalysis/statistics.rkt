@@ -46,14 +46,14 @@
 ;; Takes ciphertext and produces a list of cipher chars sorted in decreasing
 ;; order of frequency.
 (define (cipher-monograms ciphertext)
-  (let* ([st (string->list (string-downcase ciphertext))]
+  (let* ([st (string->list ciphertext)]
          [frel (cipher-mono st freq)]
          [sorfrel (sorted-cipherlst frel)]
          )
     (retlst sorfrel '())
          ))
 
-(define freq (lc (cons x 0) : x <- (string->list "abcdefghijklmnopqrstuvwxyz")))
+(define freq (lc (cons x 0) : x <- (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))
 
 (define (addlet l lst)  
   (if (null? lst) '()
@@ -83,8 +83,21 @@
 ;; Takes the cipher-word-list and produces a list of 2-letter bigram (strings)
 ;; sorted in decreasing order of frequency. Each element must be a string!
 (define (cipher-bigrams cipher-word-list)
-  '())
+  (let* ([sorl (sort (cipbi cipher-word-list bifreq) compcons)])
+    (retlst sorl '())))
 
+(define bifreq (lc (cons (list->string (list x y)) 0) :
+                   x <- (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                   y <- (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))
+
+(define (cipbi cwl lst)
+  (cond [(null? cwl) lst]
+        [(= 1 (string-length (car cwl))) (cipbi (cdr cwl) lst)]
+        [else (let* ([word (car cwl)]
+                     [listword (string->list word)]
+                     [twolet (list->string (list (car listword) (cadr listword)))]
+                     [dellet (list->string (cdr listword))])
+                (cipbi (cons dellet (cdr cwl)) (addlet twolet lst)))]))
 ;; Takes the bigram frequency order (output of `cipher-bigrams`) and computes
 ;; the neighbourhood of each letter with every other letter.
 ;;
