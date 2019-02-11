@@ -46,26 +46,36 @@
 ;; Takes ciphertext and produces a list of cipher chars sorted in decreasing
 ;; order of frequency.
 (define (cipher-monograms ciphertext)
-  '())
+  (let* ([st (string->list (string-downcase ciphertext))]
+         [frel (cipher-mono st freq)]
+         [sorfrel (sorted-cipherlst frel)]
+         )
+    (retlst sorfrel '())
+         ))
 
 (define freq (lc (cons x 0) : x <- (string->list "abcdefghijklmnopqrstuvwxyz")))
 
-(define (addlet l lst)
+(define (addlet l lst)  
   (if (null? lst) '()
       (if (equal? (caar lst) l)
           (cons (cons l (+ 1 (cdar lst))) (cdr lst))
           (cons (car lst) (addlet l (cdr lst))))))
 
 
-(define (cipher-mono cipherlst lst)
+(define (cipher-mono cipherlst lst)  ;; returns a list of (cons char freq) call with freq
   (if (null? cipherlst)
       lst
       (cipher-mono (cdr cipherlst)(addlet (car cipherlst) lst))))
 
 (define (compcons a b)
-  (> (cdr a) cdr b))
+  (> (cdr a) (cdr b)))
 
-(
+(define (sorted-cipherlst lst)
+  (sort lst compcons))
+
+(define (retlst lst l)
+  (if (null? lst) l
+      (retlst (cdr lst) (append l (list (caar lst))))))
       
       
    
