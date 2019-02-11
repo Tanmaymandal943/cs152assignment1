@@ -5,6 +5,9 @@
          racket/string
          (prefix-in utils: "utils.rkt"))
 
+
+(require "list-comprehension.rkt")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                                                                 ;;
 ;; Ciphertext Statistics                                                           ;;
