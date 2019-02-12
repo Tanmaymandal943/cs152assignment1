@@ -56,7 +56,7 @@
     (retlst sorfrel '())
          ))
 
-(define freq (lc (cons x 0) : x <- (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))
+(define freq (lc (cons x 0) : x <- (string->list "abcdefghijklmnopqrstuvwxyz")))
 
 (define (addlet l lst)  
   (if (null? lst) '()
@@ -85,11 +85,11 @@
 ;; sorted in decreasing order of frequency. Each element must be a string!
 (define (cipher-bigrams cipher-word-list)
   (let* ([sorl (sort (cipbi cipher-word-list bifreq) compcons)])
-    (retlst sorl '())))
+     (striplist sorl) ))
 
 (define bifreq (lc (cons (list->string (list x y)) 0) :
-                   x <- (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                   y <- (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ")))
+                   x <- (string->list "abcdefghijklmnopqrstuvwxyz")
+                   y <- (string->list "abcdefghijklmnopqrstuvwxyz")))
 
 (define (cipbi cwl lst)
   (cond [(null? cwl) lst]
@@ -99,6 +99,9 @@
                      [twolet (list->string (list (car listword) (cadr listword)))]
                      [dellet (list->string (cdr listword))])
                 (cipbi (cons dellet (cdr cwl)) (addlet twolet lst)))]))
+
+(define (striplist lst)
+  (if (= 0 (cdar lst)) '() (cons (car lst) (striplist (cdr lst)))))
 
 ;; Takes the bigram frequency order (output of `cipher-bigrams`) and computes
 ;; the neighbourhood of each letter with every other letter. Only unique
@@ -126,7 +129,25 @@
   ;; You must match against or test (using cond) for the `mode` argument. Possibilities are:
   ;; 'predecessor, 'successor, 'both
   ;; Figure out experimentally which of these is a good indicator for E vs T.
-  '())
+  (cond [(equal? 'predecessor mode) (une cipher-bigrams-list ciphunne1 cadr)]
+        [(equal? 'successor mode) (une cipher-bigrams-list ciphunne1 car)]
+        [else (une cipher-bigrams-list ciphunne2 x)])
+  )
+
+(define (ciphunne1 lst l c ad)
+ (if (null? lst) c
+     (if (eq? l (ad (string->list (caar lst))))
+       (ciphunne1 (cdr lst) l (+ c 1) ad)
+       (ciphunne1 (cdr lst) l c ad))))
+
+(define (ciphunne2 lst l c ad)
+ (if (null? lst) c
+     (if (or (eq? l (cadr (string->list (caar lst)))) (eq? l (car (string->list (caar lst)))))
+       (ciphunne2 (cdr lst) l (+ c 1) ad)
+       (ciphunne2 (cdr lst) l c ad))))
+
+
+(define (une lst func ad) (lc (cons x (func lst x 0 ad)) : x <- (string->list "abcefghijklmnopqrstuvwxyz")))
 
 ;; Takes the bigram frequency order (output of `cipher-bigrams`) and computes
 ;; the neighbourhood of each letter with every other letter, but counts each
@@ -139,7 +160,21 @@
   ;; You must match against or test (using cond) for the `mode` argument. Possibilities are:
   ;; 'predecessor, 'successor, 'both
   ;; Figure out experimentally which of these is a good indicator for E vs T.
-  '())
+(cond [(equal? 'predecessor mode) (une cipher-bigrams-list fciphunne1 cadr)]
+        [(equal? 'successor mode) (une cipher-bigrams-list fciphunne1 car)]
+        [else (une cipher-bigrams-list fciphunne2 x)])
+  )
+(define (fciphunne1 lst l c ad)
+ (if (null? lst) c
+     (if (eq? l (ad (string->list (caar lst))))
+       (ciphunne1 (cdr lst) l (+ c (cdar lst)) ad)
+       (ciphunne1 (cdr lst) l c ad))))
+
+(define (fciphunne2 lst l c ad)
+ (if (null? lst) c
+     (if (or (eq? l (cadr (string->list (caar lst)))) (eq? l (car (string->list (caar lst)))))
+       (ciphunne2 (cdr lst) l (+ c (cdar lst)) ad)
+       (ciphunne2 (cdr lst) l c ad))))
 
 ;; Takes the cipher-word-list and produces a list of 3-letter bigram (strings)
 ;; sorted in decreasing order of frequency. Each element must be a string!
