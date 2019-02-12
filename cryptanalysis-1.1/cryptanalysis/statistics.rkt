@@ -46,8 +46,20 @@
          ;; my-fundoo-analysis
          )
 
+
+;; Adds element x to frequency-list lst 
+
+(define (addtolist x lst)
+  (if (null? lst)
+      (list (cons x 1))
+      (if (equal? (caar lst) x) (cons (cons x (+ 1 (cdar lst))) (cdr lst))
+          (cons (car lst) (addtolist x (cdr lst))))))
+
+
 ;; Takes ciphertext and produces a list of cipher chars sorted in decreasing
 ;; order of frequency.
+
+
 (define (cipher-monograms ciphertext)
   (let* ([st (string->list ciphertext)]
          [frel (cipher-mono st '())]
@@ -56,46 +68,69 @@
     (retlst sorfrel '())
          ))
 
-;;(define freq (lc (cons x 0) : x <- (string->list "abcdefghijklmnopqrstuvwxyz")))
 
-(define (addlet l lst)  
-  (addtolist l lst))
+;; takes a characterlist and '() returns frequency list
 
-
-(define (cipher-mono cipherlst lst)  ;; returns a list of (cons char freq) call with freq
+(define (cipher-mono cipherlst lst)  
   (if (null? cipherlst)
       lst
-      (cipher-mono (cdr cipherlst)(addlet (car cipherlst) lst))))
+      (cipher-mono (cdr cipherlst)(addtolist (car cipherlst) lst))))
+
+
+;; Compares two elements of frequency list and returns is-greater?
 
 (define (compcons a b)
   (> (cdr a) (cdr b)))
 
+;; sorts frequency list
+
 (define (sorted-cipherlst lst)
   (sort lst compcons))
+
+
+;; takes a frequency list and returns a list with the elements present in the list (not the frequency)
 
 (define (retlst lst l)
   (if (null? lst) l
       (retlst (cdr lst) (append l (list (caar lst))))))
 
 
+
+
+
+
+;; first n terms of the list
+
+(define (n-terms-list lst n)
+  (if (= n 0) '()
+      (cons (car lst) (n-terms-list (cdr lst) (- n 1)))))
+
+;; return frequency list of n letter string (n-gram) of cipher-word list(cwl) taking lst as '() 
+
+(define (ngrams cwl lst n)
+  (cond [(null? cwl) lst]
+        [(> n (string-length (car cwl))) (ngrams (cdr cwl) lst n)]
+        [else (let* ([word (car cwl)]
+                     [listword (string->list word)]
+                     [nlet (list->string (n-terms-list listword n))]
+                     [dellet (list->string (cdr listword))])
+                (ngrams (cons dellet (cdr cwl)) (addtolist nlet lst) n))]))
+
+
 ;; Takes the cipher-word-list and produces a list of 2-letter bigram (strings)
 ;; sorted in decreasing order of frequency. Each element must be a string!
+
 (define (cipher-bigrams cipher-word-list)
-  (let* ([sorl (sort (cipbi cipher-word-list '()) compcons)])
+  (let* ([sorl (sort (ngrams cipher-word-list '() 2) compcons)])
      sorl))
 
 
-(define (cipbi cwl lst)
-  (cond [(null? cwl) lst]
-        [(= 1 (string-length (car cwl))) (cipbi (cdr cwl) lst)]
-        [else (let* ([word (car cwl)]
-                     [listword (string->list word)]
-                     [twolet (list->string (list (car listword) (cadr listword)))]
-                     [dellet (list->string (cdr listword))])
-                (cipbi (cons dellet (cdr cwl)) (addlet twolet lst)))]))
 
-(define (striplist lst)
-  (if (= 0 (cdar lst)) '() (cons (car lst) (striplist (cdr lst)))))
+
+
+
+
+
 
 ;; Takes the bigram frequency order (output of `cipher-bigrams`) and computes
 ;; the neighbourhood of each letter with every other letter. Only unique
@@ -120,11 +155,7 @@
 ;; The output is a list of pairs of cipher char and the count of it's
 ;; neighbours. The list must be in decreasing order of the neighbourhood count.
 
-(define (addtolist x lst)
-  (if (null? lst)
-      (list (cons x 1))
-      (if (equal? (caar lst) x) (cons (cons x (+ 1 (cdar lst))) (cdr lst))
-          (cons (car lst) (addtolist x (cdr lst))))))
+
       
 
 
@@ -139,11 +170,18 @@
         [else (une cipher-bigrams-list ciphunne2 x)])
   )
 
+
+;; takes a bigram frequency list and a character l and 0 and position (car for successor cadr for predecessor)
+;; and returns number of unique neighbours of l
+
 (define (ciphunne1 lst l c ad)
  (if (null? lst) c
      (if (eq? l (ad (string->list (caar lst))))
        (ciphunne1 (cdr lst) l (+ c 1) ad)
        (ciphunne1 (cdr lst) l c ad))))
+
+;; takes a bigram frequency list and a character l and 0 and anything (doesn't matter) and returns
+;; and returns number of 'both unique neighbours
 
 (define (ciphunne2 lst l c ad)
  (if (null? lst) c
@@ -151,6 +189,8 @@
        (ciphunne2 (cdr lst) l (+ c 1) ad)
        (ciphunne2 (cdr lst) l c ad))))
 
+;; Higher order function for (bigram-list (f)ciphunne(1/2) and function (car/cadr) and
+;; returns frequency list of unique neighbours
 
 (define (une lst func ad) (lc (cons x (func lst x 0 ad)) : x <- (string->list "abcefghijklmnopqrstuvwxyz")))
 
@@ -170,13 +210,18 @@
         [else (une cipher-bigrams-list fciphunne2 x)])
   )
 
-(define freq '())
+
+;; takes a bigram frequency list and a character l and 0 and position (car for successor cadr for predecessor)
+;; and returns number of neighbours of l
 
 (define (fciphunne1 lst l c ad)
  (if (null? lst) c
      (if (eq? l (ad (string->list (caar lst))))
        (ciphunne1 (cdr lst) l (+ c (cdar lst)) ad)
        (ciphunne1 (cdr lst) l c ad))))
+
+;; takes a bigram frequency list and a character l and 0 and anything (doesn't matter) and returns
+;; and returns number of 'both neigghbours
 
 (define (fciphunne2 lst l c ad)
  (if (null? lst) c
@@ -187,21 +232,23 @@
 ;; Takes the cipher-word-list and produces a list of 3-letter bigram (strings)
 ;; sorted in decreasing order of frequency. Each element must be a string!
 (define (cipher-trigrams cipher-word-list)
-  '())
+  (sort (ngrams cipher-word-list '() 3) compcons))
 
 ;; Takes the cipher-word-list and produces a list of 4-letter bigram (strings)
 ;; sorted in decreasing order of frequency. Each element must be a string!
 (define (cipher-quadgrams cipher-word-list)
-  '())
+  (sort (ngrams cipher-word-list '() 4) compcons))
 
 ;; Takes the cipher word list and produces a list of single letter words, sorted
 ;; in decreasing order of frequency. Each element must be a string!
 
 
+;; returns a frequency list of n-lettered word in cipher-word-list (cwl)  (list = '()
+
 (define (nword cwl n lst)
 (if (null? cwl) lst
     (if (= (string-length (car cwl)) n)
-        (nword (cdr cwl) n (addlet (car cwl) lst))
+        (nword (cdr cwl) n (addtolist (car cwl) lst))
         (nword (cdr cwl) n lst))))
 
 (define (cipher-common-words-single cipher-word-list)
