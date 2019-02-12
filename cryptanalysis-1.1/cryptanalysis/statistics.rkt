@@ -50,19 +50,16 @@
 ;; order of frequency.
 (define (cipher-monograms ciphertext)
   (let* ([st (string->list ciphertext)]
-         [frel (cipher-mono st freq)]
+         [frel (cipher-mono st '())]
          [sorfrel (sorted-cipherlst frel)]
          )
     (retlst sorfrel '())
          ))
 
-(define freq (lc (cons x 0) : x <- (string->list "abcdefghijklmnopqrstuvwxyz")))
+;;(define freq (lc (cons x 0) : x <- (string->list "abcdefghijklmnopqrstuvwxyz")))
 
 (define (addlet l lst)  
-  (if (null? lst) '()
-      (if (equal? (caar lst) l)
-          (cons (cons l (+ 1 (cdar lst))) (cdr lst))
-          (cons (car lst) (addlet l (cdr lst))))))
+  (addtolist l lst))
 
 
 (define (cipher-mono cipherlst lst)  ;; returns a list of (cons char freq) call with freq
@@ -84,12 +81,9 @@
 ;; Takes the cipher-word-list and produces a list of 2-letter bigram (strings)
 ;; sorted in decreasing order of frequency. Each element must be a string!
 (define (cipher-bigrams cipher-word-list)
-  (let* ([sorl (sort (cipbi cipher-word-list bifreq) compcons)])
-     (striplist sorl) ))
+  (let* ([sorl (sort (cipbi cipher-word-list '()) compcons)])
+     sorl))
 
-(define bifreq (lc (cons (list->string (list x y)) 0) :
-                   x <- (string->list "abcdefghijklmnopqrstuvwxyz")
-                   y <- (string->list "abcdefghijklmnopqrstuvwxyz")))
 
 (define (cipbi cwl lst)
   (cond [(null? cwl) lst]
@@ -125,6 +119,17 @@
 ;;
 ;; The output is a list of pairs of cipher char and the count of it's
 ;; neighbours. The list must be in decreasing order of the neighbourhood count.
+
+(define (addtolist x lst)
+  (if (null? lst)
+      (list (cons x 1))
+      (if (equal? (caar lst) x) (cons (cons x (+ 1 (cdar lst))) (cdr lst))
+          (cons (car lst) (addtolist x (cdr lst))))))
+      
+
+
+
+
 (define (cipher-unique-neighbourhood cipher-bigrams-list mode)
   ;; You must match against or test (using cond) for the `mode` argument. Possibilities are:
   ;; 'predecessor, 'successor, 'both
@@ -164,6 +169,9 @@
         [(equal? 'successor mode) (une cipher-bigrams-list fciphunne1 car)]
         [else (une cipher-bigrams-list fciphunne2 x)])
   )
+
+(define freq '())
+
 (define (fciphunne1 lst l c ad)
  (if (null? lst) c
      (if (eq? l (ad (string->list (caar lst))))
@@ -188,23 +196,33 @@
 
 ;; Takes the cipher word list and produces a list of single letter words, sorted
 ;; in decreasing order of frequency. Each element must be a string!
+
+
+(define (nword cwl n lst)
+(if (null? cwl) lst
+    (if (= (string-length (car cwl)) n)
+        (nword (cdr cwl) n (addlet (car cwl) lst))
+        (nword (cdr cwl) n lst))))
+
 (define (cipher-common-words-single cipher-word-list)
-  '())
+    (retlst (sort (nword cipher-word-list 1 '()) compcons) '()))
 
 ;; Takes the cipher word list and produces a list of double letter words, sorted
 ;; in decreasing order of frequency.
+ 
+
 (define (cipher-common-words-double cipher-word-list)
-  '())
+   (retlst (sort (nword cipher-word-list 2 '()) compcons) '()))
 
 ;; Takes the cipher word list and produces a list of triple letter words, sorted
 ;; in decreasing order of frequency.
 (define (cipher-common-words-triple cipher-word-list)
-  '())
+   (retlst (sort (nword cipher-word-list 3 '()) compcons) '()))
 
 ;; Takes the cipher word list and produces a list of four letter words, sorted
 ;; in decreasing order of frequency.
 (define (cipher-common-words-quadruple cipher-word-list)
-  '())
+   (retlst (sort (nword cipher-word-list 4 '()) compcons) '()))
 
 ;; Takes the cipher word list and produces a list of chars that appear at the
 ;; start of words, sorted in decreasing order of frequency. Each element must be
