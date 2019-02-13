@@ -5,6 +5,7 @@
          (prefix-in utils: "utils.rkt")
          (prefix-in stats: "statistics.rkt"))
 
+(require "list-comprehension.rkt")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                                                                     ;;
 ;; Strategies                                                                          ;;
@@ -77,8 +78,69 @@
 ;; substitutions for E, T, A and I.
 ;; Refer the assignment manual for tips on developing this strategy. You can
 ;; interact with our etai with the executable we provide.
+
+(define keys (build-list 26 (lambda (_) #\_)))
+
+(define (init-key key)
+  (list (cons #\E (list-ref key 4)) (cons #\T (list-ref key 19)) (cons #\A (list-ref key 0)) (cons #\I (list-ref key 8))))
+
+(define (make-ai lst)
+  (lc (append (list (cons #\A x)) (list (cons #\I y))) : x <- lst y <-(remove x lst)))
+  
+
+(define (nletters lst n)
+  (if (null? lst) '()
+  (if (= n 0) '()
+      (cons (car lst) (nletters (cdr lst) (- n 1))))))
+
+
+(define (leastt lst lst2)
+  ( if (equal? (member (caar lst2) lst) #f) (leastt lst (cdr lst2))
+       (member (caar lst2) lst)))
+
+
+(define (removen lst lst2 n)
+  (if (null? lst2)
+      lst
+      (if (= n 0) lst
+      (removen (remove (car lst2) lst) (cdr lst2) (- n 1))))) 
+      
+(define (conv lst)
+  (if (null? lst) '()
+      (cons (string-ref (car lst) 0) (conv (cdr lst)))))
+
+
+
 (define (etai key)
-  '())
+  (let*  ( [init-etai (init-key key)]
+           [text utils:ciphertext]
+           [wordlist utils:cipher-word-list]
+           [sing  (conv (stats:cipher-common-words-single wordlist))]
+           [fiveletters (nletters (stats:cipher-monograms text) 5)]
+           [rem5let (removen fiveletters sing 2)]
+           [probt (car (leastt rem5let (reverse (stats:cipher-unique-neighbourhood (stats:cipher-bigrams wordlist) 'both))))]
+           [rest (cons probt  (remove probt rem5let))] )
+    (cond [(> (length sing) 1)
+            (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : y <- (nletters sing 2)
+                                                                             z <- (remove y (nletters sing 2))
+                                                                             w <- rem5let
+                                                                             x <- (remove w rest)
+                                                                             )]
+           [(= (length sing) 1)
+            (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : y <- (cons (car sing) (rem5let))
+                                                                             z <- (if (= y (car sing)) (reverse rem5let)
+                                                                                                       (car sing))
+                                                                             w <- (remove y (remove z rem5let))
+                                                                             x <- (remove y (remove z (remove x rest)))
+                                                                             )]
+           [else (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : w <- rem5let
+                                                                                  x <- (remove w rest)
+                                                                                 
+                                                                                  y <- (remove x (remove w (reverse rem5let)))
+                                                                                  z <- (remove x (remove y (remove w rem5let))))]
+    
+           
+      )))
 
 ;; A suggested composition of strategies that might work well. Has not been
 ;; exhaustively tested by us. Be original ;)

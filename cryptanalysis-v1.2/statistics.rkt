@@ -74,7 +74,9 @@
 (define (cipher-mono cipherlst lst)  
   (if (null? cipherlst)
       lst
-      (cipher-mono (cdr cipherlst)(addtolist (car cipherlst) lst))))
+      (if (char-alphabetic? (car cipherlst)) (cipher-mono (cdr cipherlst)(addtolist (car cipherlst) lst))
+          (cipher-mono (cdr cipherlst) lst)
+          )))
 
 
 ;; Compares two elements of frequency list and returns is-greater?
