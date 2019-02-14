@@ -38,5 +38,87 @@
 ;;                                                                                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define keys (build-list 26 (lambda (_) #\_)))
+
+;; Returns if there is unique substitution for cryptword to dicword
+
+(define (compare-words cryptword dicword)
+  (compare-word-list (string->list cryptword) (string->list dicword)))
+
+(define (compare-word-list cryptword dicword)
+  (if (not (= (length cryptword) (length dicword))) #f
+      (cond [(null? cryptword) '()]
+            [(eq? (car cryptword) (car dicword)) (compare-word-list (cdr cryptword) (cdr dicword))]
+            [(char-lower-case? (car cryptword)) (let ([cmp (compare-word-list (cdr cryptword) (cdr dicword))]
+                                                      [sub (cons (car dicword) (car cryptword))])
+                                                  (if (boolean? cmp) cmp
+                                                      (if (valid-substitution sub cmp)
+                                                          (remove-duplicates (cons sub cmp))
+                                                          #f)) )]
+            [else #f])))
+
+(define (valid-substitution sub sub-list)
+  (if (null? sub-list) #t
+   (cond [(equal? (cdr sub) (cdar sub-list))
+          (if (equal? (car sub) (caar sub-list)) (valid-substitution sub (cdr sub-list)) #f)]
+         [(equal? (car sub) (caar sub-list))
+          (if (equal? (cdr sub) (cdar sub-list)) (valid-substitution sub (cdr sub-list)) #f)]
+
+         [else (valid-substitution sub (cdr sub-list))])))
+
+
+  
+
+
+;; Checks if a list has a unique element
+
+(define (unique-list lst)
+  (cond [(null? lst) #t]
+        [(= 1 (length lst)) #t]
+        [else (unique-list-helper lst (car lst))]))
+
+(define (unique-list-helper lst ele)
+  (cond [(null? lst) #t]
+        [(equal? ele (car lst)) (unique-list-helper (cdr lst) ele)]
+        [else #f]))
+
+
+(define (list-of-substitutions cipherword dict)
+
+  (if (null? dict) '()
+     (let ([comp (compare-words cipherword (car dict))])
+       (if (boolean? comp) (list-of-substitutions cipherword (cdr dict))
+           (cons comp (list-of-substitutions cipherword (cdr dict)))))))
+
+
+(define (possible-substitution cipherword dict)
+ (if (unique-list (list-of-substitutions cipherword dict))
+     (if (null? (list-of-substitutions cipherword dict)) '()
+         (car (list-of-substitutions cipherword dict)))
+     #f))
+
+
+(define (partial-decrypt key cipherlst)
+  (map (lambda (x) (utils:decrypt key x)) cipherlst))
+
+
+(define (dictionary-attack cipherlist dict key ocipher)
+  (if (null? cipherlist) key
+      (let ([poss (possible-substitution (utils:decrypt key (car cipherlist)) dict)])
+        (if (boolean? poss)
+            (dictionary-attack (cdr cipherlist) dict key ocipher)
+            (if (null? poss) (dictionary-attack (cdr cipherlist) dict key ocipher)
+                (if (utils:is-monoalphabetic? poss key)
+                    (let ([newkey (utils:add-substitution poss key)])
+                                                          (dictionary-attack (partial-decrypt newkey ocipher) dict newkey ocipher))
+                    #f))))))
+
+        
+
+
+
+
+
+
 (define (dictionary-closure key)
-  key)
+  (dictionary-attack utils:cipher-word-list utils:dictionary key utils:cipher-word-list))
