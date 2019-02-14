@@ -106,12 +106,26 @@
   (if (null? cipherlist) key
       (let ([poss (possible-substitution (utils:decrypt key (car cipherlist)) dict)])
         (if (boolean? poss)
-            (dictionary-attack (cdr cipherlist) dict key ocipher)
-            (if (null? poss) (dictionary-attack (cdr cipherlist) dict key ocipher)
+            (begin
+               (displayln (let* ([lst (list-of-substitutions (car cipherlist) dict)]
+                                [key1 (utils:add-substitution (car lst) key)]
+                                [word1 (utils:decrypt key1 (car cipherlist))]
+                                [key2 (utils:add-substitution (cadr lst) key)]
+                                [word2 (utils:decrypt key2 (car cipherlist))])
+                              (string-append (car cipherlist) " --> multiple matches ("
+                                         word1 " " word2 " ...)")))
+                                         (dictionary-attack (cdr cipherlist) dict key ocipher))
+            (if (null? poss) (begin (displayln (string-append (car cipherlist) " --> skipping this one"))
+                                               (dictionary-attack (cdr cipherlist) dict key ocipher))
                 (if (utils:is-monoalphabetic? poss key)
+                    (begin (let* ([lst (list-of-substitutions (car cipherlist) dict)]
+                                [key1 (utils:add-substitution (car lst) key)]
+                                [word1 (utils:decrypt key1 (car cipherlist))])
+                             (displayln (string-append (car cipherlist) " --> unique match   " word1)))
+                    
                     (let ([newkey (utils:add-substitution poss key)])
                                                           (dictionary-attack (partial-decrypt newkey ocipher) dict newkey ocipher))
-                    #f))))))
+                    ) #f))))))
 
         
 
