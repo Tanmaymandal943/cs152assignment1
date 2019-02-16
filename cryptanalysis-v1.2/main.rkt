@@ -8,7 +8,8 @@
          (prefix-in strat: "strategies.rkt")
          (prefix-in stats: "statistics.rkt")
          (prefix-in  algo: "dict-closure.rkt")
-         (prefix-in  algo: "secret-word-enumeration.rkt"))
+         (prefix-in  algo: "secret-word-enumeration.rkt")
+         "list-comprehension.rkt")
 
 (provide crack-cipher
          crack-hard-cipher ;; Optional, no extra credits for this :)
@@ -121,7 +122,15 @@
 (define (crack-cipher strategies key) ;; Returns list of encryption keys.
   ;; make use of `utils:ciphertext` and `utils:cipher-word-list`
   ;; DISPLAY A KEY AS SOON AS YOU FIND IT USING (show-key key)
-  (list key))
+  (let ([list-of-substitutions (strategies key)])
+     (stripf (lc (algo:secret-word-enumeration (algo:dictionary-closure (utils:add-substitution x key))) :
+                 x <- list-of-substitutions))))
+  
+(define (stripf lst)
+  (if (null? lst) '()
+  (if (equal? #f (car lst)) (stripf (cdr lst))
+      (cons (car lst) (stripf (cdr lst))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                                 Optional task                                    ;;

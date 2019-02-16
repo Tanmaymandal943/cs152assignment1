@@ -66,12 +66,12 @@
 
 (define (dict-attact keyword dict lst key)
   (if (null? dict) lst
-      (if (= (length lst) 2) lst
+      
           (let ([comp (comp-word keyword (car dict))])
             (if (equal? #f comp) (dict-attact keyword (cdr dict) lst key)
                 (if (list? (valid-possible-key key (utils:encryption-key (car dict))))
                      (dict-attact keyword (cdr dict) (cons comp lst) key)
-                     (dict-attact keyword (cdr dict) lst key)))))))
+                     (dict-attact keyword (cdr dict) lst key))))))
 
 (define (nletters lst n)
   (if (null? lst) '()
@@ -82,8 +82,22 @@
 
     
   
-(define (secret-word-enumeration key-after-dictionary-closure) ;; Returns a key or false (#f)
+(define (secret-word-enumeration key-after-dictionary-closure)
+  (if (equal? #f key-after-dictionary-closure) #f ;; Returns a key or false (#f)
   (let ([listkeys (dict-attact (nletters key-after-dictionary-closure 6) dictionary '() key-after-dictionary-closure)])
-    (cond [(= 0 (length listkeys)) #f]
-          [(= 1 (length listkeys)) (utils:encryption-key (list->string (car listkeys)))]
-          [else key-after-dictionary-closure])))
+    (cond [(= 0  (length listkeys)) (begin (displayln "  swe: no consistent candidates, key failed!") #f)]
+          [(= 1 (length listkeys))
+           (begin (displayln (string-append "  swe: potential consistent candidates: (" (list->string (car listkeys)) ")"))
+                                                                    
+                  (begin (displayln "  swe: completed key found!")
+                         (begin (displayln (string-append "  swe: secret-word is " (list->string (car listkeys))))
+                            (begin    (utils:show-key (utils:encryption-key (list->string (car listkeys))))
+                           (utils:encryption-key (list->string (car listkeys)))))))]
+          [else (begin (print-potential-candidates listkeys) key-after-dictionary-closure)]))))
+
+(define (print-potential-candidates lst)
+  (displayln (string-append "  swe: potential consistent candidates: ( "  (list->string (car lst)) (wordr (cdr lst)) ")")))
+
+(define (wordr lst)
+  (if (null? lst) ""
+  (string-append "  " (list->string (car lst)) (wordr (cdr lst)))))

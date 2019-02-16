@@ -121,26 +121,29 @@
            [probt (car (leastt rem5let (reverse (stats:cipher-unique-neighbourhood (stats:cipher-bigrams wordlist) 'both))))]
            [rest (cons probt  (remove probt rem5let))] )
     (cond [(> (length sing) 1)
-            (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : y <- (nletters sing 2)
-                                                                             z <- (remove y (nletters sing 2))
-                                                                             w <- rem5let
-                                                                             x <- (remove w rest)
+            (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : y <- (what-to-sub (nletters sing 2) key 0)
+                                                                             z <- (what-to-sub (remove y (nletters sing 2)) key 8)
+                                                                             w <- (what-to-sub rem5let key 4)
+                                                                             x <- (what-to-sub (remove w rest) key 19)
                                                                              )]
            [(= (length sing) 1)
-            (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : y <- (cons (car sing) (rem5let))
-                                                                             z <- (if (= y (car sing)) (reverse rem5let)
-                                                                                                       (car sing))
-                                                                             w <- (remove y (remove z rem5let))
-                                                                             x <- (remove y (remove z (remove x rest)))
+            (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : y <- (what-to-sub (cons (car sing) (rem5let)) key 0)
+                                                                             z <- (what-to-sub (if (= y (car sing)) (reverse rem5let)
+                                                                                                       (car sing)) key 8)
+                                                                             w <- (what-to-sub (remove y (remove z rem5let)) key 4)
+                                                                             x <- (what-to-sub (remove y (remove z (remove x rest))) key 19)
                                                                              )]
-           [else (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : w <- rem5let
-                                                                                  x <- (remove w rest)
+           [else (lc (list (cons #\E w) (cons #\T x) (cons #\A y) (cons #\I z)) : w <- (what-to-sub rem5let key 4)
+                                                                                  x <- (what-to-sub (remove w rest) key 19)
                                                                                  
-                                                                                  y <- (remove x (remove w (reverse rem5let)))
-                                                                                  z <- (remove x (remove y (remove w rem5let))))]
+                                                                                  y <- (what-to-sub (remove x (remove w (reverse rem5let))) key 0)
+                                                                                  z <- (what-to-sub (remove x (remove y (remove w rem5let))) key 8))]
     
            
       )))
+
+(define (what-to-sub lst key i)
+  (if (equal? #\_ (list-ref key i)) lst (list (list-ref key i))))
 
 ;; A suggested composition of strategies that might work well. Has not been
 ;; exhaustively tested by us. Be original ;)

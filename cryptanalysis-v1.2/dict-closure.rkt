@@ -152,4 +152,3 @@
 (define (dictionary-closure key)
   (dictionary-attack  utils:cipher-word-list utils:dictionary key utils:cipher-word-list))
 
-(dictionary-closure keys)
