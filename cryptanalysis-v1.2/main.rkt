@@ -122,9 +122,10 @@
 (define (crack-cipher strategies key) ;; Returns list of encryption keys.
   ;; make use of `utils:ciphertext` and `utils:cipher-word-list`
   ;; DISPLAY A KEY AS SOON AS YOU FIND IT USING (show-key key)
-  (let ([list-of-substitutions (strategies key)])
-     (stripf (lc (algo:secret-word-enumeration (algo:dictionary-closure (utils:add-substitution x key))) :
-                 x <- list-of-substitutions))))
+  (let* ([list-of-substitutions-h ((car strategies) key)]
+        [list-of-substitutions (append list-of-substitutions-h '(()))])
+    (remove-duplicates (stripf (lc (algo:secret-word-enumeration (algo:dictionary-closure (utils:add-substitution x key))) :
+                 x <- list-of-substitutions)))))
   
 (define (stripf lst)
   (if (null? lst) '()
